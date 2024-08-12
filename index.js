@@ -16,11 +16,18 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.post('/api/users', (req, res) => {
   let user;
   const userIndex = users.findIndex(v => v.username === req.body.username);
-  if ( userIndex < 0) 
+  if ( userIndex < 0) {
     user = getNewUser(req.body.username);
-  else
+    users.push(user);
+  } else {
     user = users[userIndex]
+  }
+  
   res.json(user);
+})
+
+app.get('/api/users', (req, res) => {
+  res.json(users);
 })
 
 const listener = app.listen(process.env.PORT || 3000, () => {
