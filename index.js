@@ -5,6 +5,7 @@ require('dotenv').config()
 const bodyParser = require('body-parser');
 
 let users = [];
+let logs = [];
 
 app.use(cors())
 app.use(express.static('public'))
@@ -37,19 +38,36 @@ app.post('/api/users/:_id/exercises', (req, res) => {
   let rawdate = req.body.date ? new Date(req.body.date) : new Date();
   let date = rawdate.toDateString();
   let username = users.find(v => v._id === _id).username;
+  let exerciseObj = {
+    description,
+    duration,
+    date,
+  }
   let exercise = {
-    username: username,
-    description: description,
-    duration: duration,
-    date: date,
-    _id: _id
+    username,
+    ...exerciseObj,
+    _id
+  }
+  let newLog;
+  const logIndex = logs.findIndex(v => v._id === _id);
+  if ( logIndex < 0) {
+    newLog = {
+      username,
+      count: 1,
+      _id,
+      log: [{...exerciseObj}]
+    };
+    logs.push(newLog);
+  } else {
+    logs[logIndex].log.push({...exerciseObj})
+    logs[logIndex].count++
   }
   res.json(exercise);
 })
 
-// app.get('/api/users/:_id/log', (req, res) => {
-
-// })
+app.get('/api/users/:_id/logs', (req, res) => {
+  res.json(logs.find(v => v._id === req.params._id));
+})
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
