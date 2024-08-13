@@ -66,7 +66,23 @@ app.post('/api/users/:_id/exercises', (req, res) => {
 })
 
 app.get('/api/users/:_id/logs', (req, res) => {
-  res.json(logs.find(v => v._id === req.params._id));
+  const from = req.query.from;
+  const to = req.query.to;
+  const limit = req.query.limit;
+
+  let currentUserLog = {...logs.find(v => v._id === req.params._id)};
+  if (from) {
+    let filteredLog = currentUserLog.log.filter(el => new Date(el.date) >= new Date(from));
+    currentUserLog.log = filteredLog;
+  }
+  if (to) {
+    let filteredLog = currentUserLog.log.filter(el => new Date(el.date) <= new Date(to));
+    currentUserLog.log = filteredLog;
+  }
+  if (limit) {
+    currentUserLog.log.length = limit;
+  }
+  res.json(currentUserLog);
 })
 
 const listener = app.listen(process.env.PORT || 3000, () => {
@@ -89,16 +105,3 @@ function createRandomId(length) {
   }
   return result;
 }
-
-/*
-{
-  username: "fcc_test",
-  count: 1,
-  _id: "5fb5853f734231456ccb3b05",
-  log: [{
-    description: "test",
-    duration: 60,
-    date: "Mon Jan 01 1990",
-  }]
-}
-*/
